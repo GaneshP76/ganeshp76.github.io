@@ -1,0 +1,1132 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Your Name - AI/ML/VR Portfolio</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            overflow-x: hidden;
+            transition: background 1s ease;
+        }
+
+        body.night-mode {
+            background: #0a0e27;
+            color: #e0e0e0;
+        }
+
+        body.day-mode {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: #2d3748;
+        }
+
+        .stars {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            pointer-events: none;
+            z-index: 0;
+            opacity: 0;
+            transition: opacity 1s ease;
+        }
+
+        body.night-mode .stars {
+            opacity: 1;
+        }
+
+        .star {
+            position: absolute;
+            width: 2px;
+            height: 2px;
+            background: white;
+            border-radius: 50%;
+            animation: twinkle 3s infinite;
+        }
+
+        .shooting-star {
+            position: absolute;
+            width: 2px;
+            height: 2px;
+            background: white;
+            border-radius: 50%;
+            box-shadow: 0 0 10px 2px rgba(255, 255, 255, 0.8);
+            animation: shoot 3s linear infinite;
+        }
+
+        @keyframes shoot {
+            0% {
+                transform: translate(0, 0);
+                opacity: 1;
+            }
+            100% {
+                transform: translate(-300px, 300px);
+                opacity: 0;
+            }
+        }
+
+        @keyframes twinkle {
+            0%, 100% { opacity: 0.3; transform: scale(1); }
+            50% { opacity: 1; transform: scale(1.2); }
+        }
+
+        .clouds {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            pointer-events: none;
+            z-index: 0;
+            opacity: 0;
+            transition: opacity 1s ease;
+        }
+
+        body.day-mode .clouds {
+            opacity: 1;
+        }
+
+        .cloud {
+            position: absolute;
+            background: rgba(255, 255, 255, 0.3);
+            border-radius: 100px;
+            animation: float-cloud 30s linear infinite;
+        }
+
+        @keyframes float-cloud {
+            0% { transform: translateX(-100%); }
+            100% { transform: translateX(100vw); }
+        }
+
+        .sun {
+            position: fixed;
+            top: 100px;
+            right: 100px;
+            width: 100px;
+            height: 100px;
+            background: radial-gradient(circle, #ffd700 0%, #ff8c00 100%);
+            border-radius: 50%;
+            box-shadow: 0 0 60px 20px rgba(255, 215, 0, 0.6);
+            z-index: 1;
+            opacity: 0;
+            transition: opacity 1s ease, transform 1s ease;
+            animation: pulse-sun 4s ease-in-out infinite;
+        }
+
+        body.day-mode .sun {
+            opacity: 1;
+            transform: scale(1);
+        }
+
+        @keyframes pulse-sun {
+            0%, 100% { transform: scale(1); }
+            50% { transform: scale(1.1); }
+        }
+
+        .moon {
+            position: fixed;
+            top: 100px;
+            right: 100px;
+            width: 100px;
+            height: 100px;
+            background: radial-gradient(circle at 30% 30%, #f0f0f0 0%, #8899aa 100%);
+            border-radius: 50%;
+            box-shadow: 0 0 60px 20px rgba(150, 200, 255, 0.4);
+            z-index: 1;
+            opacity: 0;
+            transition: opacity 1s ease, transform 1s ease;
+            animation: pulse-moon 4s ease-in-out infinite;
+        }
+
+        body.night-mode .moon {
+            opacity: 1;
+            transform: scale(1);
+        }
+
+        @keyframes pulse-moon {
+            0%, 100% { transform: scale(1) rotate(0deg); }
+            50% { transform: scale(1.05) rotate(5deg); }
+        }
+
+        .toggle-container {
+            position: fixed;
+            top: 80px;
+            right: 20px;
+            z-index: 2000;
+        }
+
+        .toggle-btn {
+            width: 80px;
+            height: 40px;
+            background: rgba(255, 255, 255, 0.1);
+            border: 2px solid rgba(0, 255, 255, 0.5);
+            border-radius: 50px;
+            position: relative;
+            cursor: pointer;
+            transition: all 0.5s ease;
+            backdrop-filter: blur(10px);
+        }
+
+        body.day-mode .toggle-btn {
+            border-color: rgba(255, 215, 0, 0.8);
+            background: rgba(255, 255, 255, 0.3);
+        }
+
+        .toggle-btn:hover {
+            transform: scale(1.1);
+        }
+
+        .toggle-slider {
+            position: absolute;
+            top: 4px;
+            left: 4px;
+            width: 28px;
+            height: 28px;
+            background: #00ffff;
+            border-radius: 50%;
+            transition: all 0.5s cubic-bezier(0.68, -0.55, 0.265, 1.55);
+            box-shadow: 0 0 20px rgba(0, 255, 255, 0.8);
+        }
+
+        body.day-mode .toggle-slider {
+            left: 44px;
+            background: #ffd700;
+            box-shadow: 0 0 20px rgba(255, 215, 0, 0.8);
+        }
+
+        nav {
+            position: fixed;
+            top: 0;
+            width: 100%;
+            padding: 1rem 2rem;
+            z-index: 1000;
+            border-bottom: 1px solid rgba(0, 255, 255, 0.2);
+            transition: all 0.5s ease;
+        }
+
+        body.night-mode nav {
+            background: rgba(10, 14, 39, 0.95);
+            backdrop-filter: blur(10px);
+        }
+
+        body.day-mode nav {
+            background: rgba(255, 255, 255, 0.15);
+            backdrop-filter: blur(10px);
+            border-bottom-color: rgba(255, 255, 255, 0.3);
+        }
+
+        nav ul {
+            list-style: none;
+            display: flex;
+            justify-content: center;
+            gap: 2rem;
+            flex-wrap: wrap;
+        }
+
+        nav a {
+            text-decoration: none;
+            font-weight: 500;
+            transition: all 0.3s;
+            position: relative;
+            padding: 0.5rem 1rem;
+        }
+
+        body.night-mode nav a {
+            color: #00ffff;
+        }
+
+        body.day-mode nav a {
+            color: #ffffff;
+        }
+
+        nav a::before {
+            content: '';
+            position: absolute;
+            bottom: 0;
+            left: 50%;
+            width: 0;
+            height: 2px;
+            background: currentColor;
+            transition: all 0.3s;
+            transform: translateX(-50%);
+        }
+
+        nav a:hover::before {
+            width: 100%;
+        }
+
+        nav a:hover {
+            transform: translateY(-3px);
+        }
+
+        body.night-mode nav a:hover {
+            color: #ff00ff;
+            text-shadow: 0 0 10px #ff00ff;
+        }
+
+        body.day-mode nav a:hover {
+            color: #ffd700;
+            text-shadow: 0 0 10px rgba(255, 215, 0, 0.6);
+        }
+
+        section {
+            min-height: 100vh;
+            padding: 6rem 2rem 4rem;
+            position: relative;
+            z-index: 1;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+
+        .hero {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            text-align: center;
+        }
+
+        .profile-container {
+            position: relative;
+            margin-bottom: 2rem;
+        }
+
+        .profile-img {
+            width: 250px;
+            height: 250px;
+            border-radius: 50%;
+            box-shadow: 0 0 40px rgba(0, 255, 255, 0.5);
+            animation: float 6s ease-in-out infinite;
+            object-fit: cover;
+            transition: all 0.5s ease;
+        }
+
+        body.night-mode .profile-img {
+            border: 4px solid #00ffff;
+            box-shadow: 0 0 40px rgba(0, 255, 255, 0.5), 0 0 80px rgba(255, 0, 255, 0.3);
+        }
+
+        body.day-mode .profile-img {
+            border: 4px solid #ffd700;
+            box-shadow: 0 0 40px rgba(255, 215, 0, 0.6), 0 0 80px rgba(255, 255, 255, 0.4);
+        }
+
+        @keyframes float {
+            0%, 100% { transform: translateY(0px) rotate(0deg); }
+            25% { transform: translateY(-20px) rotate(2deg); }
+            75% { transform: translateY(-20px) rotate(-2deg); }
+        }
+
+        .orbit-ring {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            border: 2px solid transparent;
+            border-radius: 50%;
+            animation: rotate 10s linear infinite;
+        }
+
+        .orbit-ring:nth-child(1) {
+            width: 280px;
+            height: 280px;
+            border-top-color: rgba(0, 255, 255, 0.5);
+            border-right-color: rgba(0, 255, 255, 0.5);
+        }
+
+        .orbit-ring:nth-child(2) {
+            width: 310px;
+            height: 310px;
+            border-bottom-color: rgba(255, 0, 255, 0.5);
+            border-left-color: rgba(255, 0, 255, 0.5);
+            animation-direction: reverse;
+            animation-duration: 8s;
+        }
+
+        @keyframes rotate {
+            0% { transform: translate(-50%, -50%) rotate(0deg); }
+            100% { transform: translate(-50%, -50%) rotate(360deg); }
+        }
+
+        .glitch {
+            font-size: 4rem;
+            font-weight: bold;
+            margin-bottom: 1rem;
+            animation: glitch 5s infinite;
+            position: relative;
+            transition: all 0.5s ease;
+        }
+
+        body.night-mode .glitch {
+            background: linear-gradient(45deg, #00ffff, #ff00ff);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            filter: drop-shadow(0 0 20px rgba(0, 255, 255, 0.5));
+        }
+
+        body.day-mode .glitch {
+            background: linear-gradient(45deg, #ffd700, #ff69b4);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            filter: drop-shadow(0 0 20px rgba(255, 215, 0, 0.5));
+        }
+
+        @keyframes glitch {
+            0%, 90%, 100% { transform: translate(0); }
+            92% { transform: translate(-2px, 2px); }
+            94% { transform: translate(2px, -2px); }
+            96% { transform: translate(-2px, -2px); }
+        }
+
+        .subtitle {
+            font-size: 1.5rem;
+            margin-bottom: 2rem;
+            animation: fadeInUp 1s ease;
+            transition: all 0.5s ease;
+        }
+
+        body.night-mode .subtitle {
+            color: #00ffff;
+            text-shadow: 0 0 20px rgba(0, 255, 255, 0.5);
+        }
+
+        body.day-mode .subtitle {
+            color: #ffffff;
+            text-shadow: 0 0 20px rgba(255, 255, 255, 0.5);
+        }
+
+        @keyframes fadeInUp {
+            from {
+                opacity: 0;
+                transform: translateY(30px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .intro-text {
+            max-width: 800px;
+            line-height: 1.8;
+            font-size: 1.1rem;
+            margin: 0 auto;
+            animation: fadeInUp 1.2s ease;
+        }
+
+        .section-title {
+            font-size: 3rem;
+            text-align: center;
+            margin-bottom: 3rem;
+            position: relative;
+            animation: titleGlow 3s ease-in-out infinite;
+            transition: all 0.5s ease;
+        }
+
+        body.night-mode .section-title {
+            background: linear-gradient(45deg, #00ffff, #ff00ff, #00ffff);
+            background-size: 200% 200%;
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            animation: titleGlow 3s ease-in-out infinite, gradient-shift 5s ease infinite;
+        }
+
+        body.day-mode .section-title {
+            background: linear-gradient(45deg, #ffd700, #ff69b4, #ffd700);
+            background-size: 200% 200%;
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            animation: titleGlow 3s ease-in-out infinite, gradient-shift 5s ease infinite;
+        }
+
+        @keyframes gradient-shift {
+            0%, 100% { background-position: 0% 50%; }
+            50% { background-position: 100% 50%; }
+        }
+
+        @keyframes titleGlow {
+            0%, 100% { filter: drop-shadow(0 0 10px currentColor); }
+            50% { filter: drop-shadow(0 0 30px currentColor); }
+        }
+
+        .card {
+            border-radius: 15px;
+            padding: 2rem;
+            margin-bottom: 2rem;
+            transition: all 0.5s cubic-bezier(0.68, -0.55, 0.265, 1.55);
+            backdrop-filter: blur(10px);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .card::before {
+            content: '';
+            position: absolute;
+            top: -50%;
+            left: -50%;
+            width: 200%;
+            height: 200%;
+            background: radial-gradient(circle, rgba(255, 255, 255, 0.1) 0%, transparent 70%);
+            opacity: 0;
+            transition: opacity 0.5s;
+        }
+
+        .card:hover::before {
+            opacity: 1;
+            animation: shimmer 2s linear infinite;
+        }
+
+        @keyframes shimmer {
+            0% { transform: translate(-50%, -50%) rotate(0deg); }
+            100% { transform: translate(-50%, -50%) rotate(360deg); }
+        }
+
+        body.night-mode .card {
+            background: rgba(255, 255, 255, 0.05);
+            border: 1px solid rgba(0, 255, 255, 0.3);
+        }
+
+        body.day-mode .card {
+            background: rgba(255, 255, 255, 0.25);
+            border: 1px solid rgba(255, 255, 255, 0.4);
+        }
+
+        .card:hover {
+            transform: translateY(-15px) scale(1.02);
+        }
+
+        body.night-mode .card:hover {
+            box-shadow: 0 20px 60px rgba(0, 255, 255, 0.4), 0 0 40px rgba(255, 0, 255, 0.2);
+            border-color: #ff00ff;
+        }
+
+        body.day-mode .card:hover {
+            box-shadow: 0 20px 60px rgba(255, 215, 0, 0.4), 0 0 40px rgba(255, 255, 255, 0.3);
+            border-color: #ffd700;
+        }
+
+        .experience-item h3, .research-item h3 {
+            font-size: 1.5rem;
+            margin-bottom: 0.5rem;
+            transition: all 0.3s ease;
+        }
+
+        body.night-mode .experience-item h3, 
+        body.night-mode .research-item h3 {
+            color: #00ffff;
+        }
+
+        body.day-mode .experience-item h3, 
+        body.day-mode .research-item h3 {
+            color: #ffd700;
+        }
+
+        .experience-item .company, .research-item .venue {
+            font-style: italic;
+            margin-bottom: 1rem;
+            transition: all 0.3s ease;
+        }
+
+        body.night-mode .experience-item .company, 
+        body.night-mode .research-item .venue {
+            color: #ff00ff;
+        }
+
+        body.day-mode .experience-item .company, 
+        body.day-mode .research-item .venue {
+            color: #ff69b4;
+        }
+
+        .skills-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 2rem;
+        }
+
+        .skill-category h3 {
+            margin-bottom: 1rem;
+            font-size: 1.3rem;
+            transition: all 0.3s ease;
+        }
+
+        body.night-mode .skill-category h3 {
+            color: #ff00ff;
+        }
+
+        body.day-mode .skill-category h3 {
+            color: #ff69b4;
+        }
+
+        .skill-item {
+            padding: 0.8rem;
+            margin-bottom: 0.8rem;
+            border-radius: 8px;
+            transition: all 0.3s cubic-bezier(0.68, -0.55, 0.265, 1.55);
+            cursor: pointer;
+        }
+
+        body.night-mode .skill-item {
+            background: rgba(0, 255, 255, 0.1);
+            border-left: 3px solid #00ffff;
+        }
+
+        body.day-mode .skill-item {
+            background: rgba(255, 255, 255, 0.3);
+            border-left: 3px solid #ffd700;
+        }
+
+        .skill-item:hover {
+            transform: translateX(15px) scale(1.05);
+        }
+
+        body.night-mode .skill-item:hover {
+            background: rgba(255, 0, 255, 0.2);
+            border-left-color: #ff00ff;
+            box-shadow: 0 5px 20px rgba(255, 0, 255, 0.3);
+        }
+
+        body.day-mode .skill-item:hover {
+            background: rgba(255, 215, 0, 0.3);
+            border-left-color: #ff69b4;
+            box-shadow: 0 5px 20px rgba(255, 215, 0, 0.3);
+        }
+
+        .projects-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 2rem;
+        }
+
+        .project-card {
+            border-radius: 15px;
+            padding: 2rem;
+            transition: all 0.5s cubic-bezier(0.68, -0.55, 0.265, 1.55);
+            position: relative;
+            overflow: hidden;
+        }
+
+        body.night-mode .project-card {
+            background: rgba(255, 255, 255, 0.05);
+            border: 1px solid rgba(0, 255, 255, 0.3);
+        }
+
+        body.day-mode .project-card {
+            background: rgba(255, 255, 255, 0.25);
+            border: 1px solid rgba(255, 255, 255, 0.4);
+        }
+
+        .project-card:hover {
+            transform: scale(1.08) rotate(2deg);
+        }
+
+        body.night-mode .project-card:hover {
+            box-shadow: 0 15px 50px rgba(255, 0, 255, 0.5);
+            border-color: #ff00ff;
+        }
+
+        body.day-mode .project-card:hover {
+            box-shadow: 0 15px 50px rgba(255, 215, 0, 0.5);
+            border-color: #ffd700;
+        }
+
+        .project-card h3 {
+            margin-bottom: 1rem;
+            transition: all 0.3s ease;
+        }
+
+        body.night-mode .project-card h3 {
+            color: #ff00ff;
+        }
+
+        body.day-mode .project-card h3 {
+            color: #ffd700;
+        }
+
+        footer {
+            text-align: center;
+            padding: 2rem;
+            transition: all 0.5s ease;
+        }
+
+        body.night-mode footer {
+            background: rgba(10, 14, 39, 0.95);
+            border-top: 1px solid rgba(0, 255, 255, 0.2);
+        }
+
+        body.day-mode footer {
+            background: rgba(255, 255, 255, 0.15);
+            border-top: 1px solid rgba(255, 255, 255, 0.3);
+        }
+
+        .social-links {
+            display: flex;
+            justify-content: center;
+            gap: 2rem;
+            margin-top: 1rem;
+        }
+
+        .social-links a {
+            text-decoration: none;
+            transition: all 0.3s;
+            font-size: 1.2rem;
+            padding: 0.5rem 1rem;
+            border-radius: 10px;
+        }
+
+        body.night-mode .social-links a {
+            color: #00ffff;
+        }
+
+        body.day-mode .social-links a {
+            color: #ffffff;
+        }
+
+        .social-links a:hover {
+            transform: translateY(-5px) scale(1.1);
+        }
+
+        body.night-mode .social-links a:hover {
+            color: #ff00ff;
+            text-shadow: 0 0 20px #ff00ff;
+            background: rgba(255, 0, 255, 0.1);
+        }
+
+        body.day-mode .social-links a:hover {
+            color: #ffd700;
+            text-shadow: 0 0 20px #ffd700;
+            background: rgba(255, 215, 0, 0.2);
+        }
+
+        .particle {
+            position: fixed;
+            pointer-events: none;
+            z-index: 5;
+        }
+
+        @media (max-width: 768px) {
+            .glitch {
+                font-size: 2.5rem;
+            }
+
+            .subtitle {
+                font-size: 1.2rem;
+            }
+
+            .section-title {
+                font-size: 2rem;
+            }
+
+            nav ul {
+                gap: 1rem;
+            }
+
+            .profile-img {
+                width: 200px;
+                height: 200px;
+            }
+
+            .orbit-ring:nth-child(1) {
+                width: 230px;
+                height: 230px;
+            }
+
+            .orbit-ring:nth-child(2) {
+                width: 260px;
+                height: 260px;
+            }
+
+            .sun, .moon {
+                width: 70px;
+                height: 70px;
+                top: 80px;
+                right: 20px;
+            }
+        }
+
+        /* Respect users who prefer reduced motion */
+        @media (prefers-reduced-motion: reduce) {
+            * {
+                animation-duration: 0.001ms !important;
+                animation-iteration-count: 1 !important;
+                transition-duration: 0.001ms !important;
+            }
+
+            .particle, .shooting-star {
+                display: none !important;
+            }
+        }
+
+        /* Focus-visible for keyboard users */
+        a:focus-visible, button:focus-visible {
+            outline: 3px solid rgba(255, 215, 0, 0.9);
+            outline-offset: 2px;
+        }
+    </style>
+</head>
+<body class="night-mode">
+    <a class="skip-link" href="#main" style="position:absolute;left:-999px;top:auto;width:1px;height:1px;overflow:hidden;">Skip to content</a>
+    <div class="stars" id="stars"></div>
+    <div class="clouds" id="clouds"></div>
+    <div class="sun"></div>
+    <div class="moon"></div>
+
+    <div class="toggle-container">
+        <button id="toggleBtn" class="toggle-btn" aria-pressed="false" aria-label="Toggle day/night theme">
+            <div class="toggle-slider" aria-hidden="true"></div>
+        </button>
+    </div>
+
+    <nav>
+        <ul>
+            <li><a href="#home">Home</a></li>
+            <li><a href="#about">About</a></li>
+            <li><a href="#experience">Experience</a></li>
+            <li><a href="#skills">Skills</a></li>
+            <li><a href="#research">Research</a></li>
+            <li><a href="#projects">Projects</a></li>
+            <li><a href="#contact">Contact</a></li>
+        </ul>
+    </nav>
+
+    <main id="main">
+    <section id="home" class="hero">
+        <div class="container">
+            <div class="profile-container">
+                <div class="orbit-ring"></div>
+                <div class="orbit-ring"></div>
+                <img src="https://via.placeholder.com/250" alt="Your Profile" class="profile-img">
+            </div>
+            <h1 class="glitch">YOUR NAME</h1>
+            <p class="subtitle">AI/ML Engineer | VR Developer | Research Scientist</p>
+            <p class="intro-text">
+                Exploring the frontiers of artificial intelligence, machine learning, and virtual reality. 
+                Passionate about creating intelligent systems that bridge the gap between human cognition and computational power.
+            </p>
+        </div>
+    </section>
+
+    <section id="about">
+        <div class="container">
+            <h2 class="section-title">About Me</h2>
+            <div class="card">
+                <p style="line-height: 1.8; font-size: 1.1rem;">
+                    I am a passionate technologist specializing in the convergence of AI, ML, and VR technologies. 
+                    With a strong foundation in computer science and years of hands-on experience, I develop 
+                    cutting-edge solutions that push the boundaries of what's possible in immersive and intelligent systems.
+                    My work focuses on creating seamless interactions between humans and machines, leveraging deep learning,
+                    computer vision, and spatial computing to build the future of technology.
+                </p>
+            </div>
+        </div>
+    </section>
+
+    <section id="experience">
+        <div class="container">
+            <h2 class="section-title">Experience</h2>
+            
+            <div class="card experience-item">
+                <h3>Senior AI/ML Engineer</h3>
+                <p class="company">TechCorp Innovation Labs | 2022 - Present</p>
+                <p>Leading development of advanced neural network architectures for real-time object detection and tracking in VR environments. Implemented transformer-based models achieving 95% accuracy in complex scenarios.</p>
+            </div>
+
+            <div class="card experience-item">
+                <h3>VR Research Developer</h3>
+                <p class="company">Virtual Dynamics Inc. | 2020 - 2022</p>
+                <p>Designed and deployed immersive VR training simulations using Unity and Unreal Engine. Integrated ML models for adaptive learning experiences and user behavior prediction.</p>
+            </div>
+
+            <div class="card experience-item">
+                <h3>Machine Learning Intern</h3>
+                <p class="company">AI Solutions Group | 2019 - 2020</p>
+                <p>Developed predictive models using TensorFlow and PyTorch. Contributed to computer vision projects involving image segmentation and classification tasks.</p>
+            </div>
+        </div>
+    </section>
+
+    <section id="skills">
+        <div class="container">
+            <h2 class="section-title">Skills & Expertise</h2>
+            <div class="skills-grid">
+                <div class="skill-category card">
+                    <h3>Programming Languages</h3>
+                    <div class="skill-item">Python</div>
+                    <div class="skill-item">C++</div>
+                    <div class="skill-item">JavaScript/TypeScript</div>
+                    <div class="skill-item">C#</div>
+                    <div class="skill-item">CUDA</div>
+                </div>
+
+                <div class="skill-category card">
+                    <h3>AI/ML Frameworks</h3>
+                    <div class="skill-item">TensorFlow</div>
+                    <div class="skill-item">PyTorch</div>
+                    <div class="skill-item">Keras</div>
+                    <div class="skill-item">Scikit-learn</div>
+                    <div class="skill-item">OpenCV</div>
+                </div>
+
+                <div class="skill-category card">
+                    <h3>VR/AR Technologies</h3>
+                    <div class="skill-item">Unity 3D</div>
+                    <div class="skill-item">Unreal Engine</div>
+                    <div class="skill-item">Oculus SDK</div>
+                    <div class="skill-item">WebXR</div>
+                    <div class="skill-item">SteamVR</div>
+                </div>
+
+                <div class="skill-category card">
+                    <h3>Specializations</h3>
+                    <div class="skill-item">Deep Learning</div>
+                    <div class="skill-item">Computer Vision</div>
+                    <div class="skill-item">Natural Language Processing</div>
+                    <div class="skill-item">Reinforcement Learning</div>
+                    <div class="skill-item">3D Graphics</div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <section id="research">
+        <div class="container">
+            <h2 class="section-title">Research Interests</h2>
+            
+            <div class="card research-item">
+                <h3>Neural Rendering in Virtual Environments</h3>
+                <p class="venue">Published: International Conference on Computer Vision (ICCV) 2023</p>
+                <p>Investigating novel neural rendering techniques for photorealistic VR experiences. Exploring NeRF and gaussian splatting methods for real-time applications with focus on reducing computational overhead while maintaining visual fidelity.</p>
+            </div>
+
+            <div class="card research-item">
+                <h3>Adaptive AI Systems for Immersive Learning</h3>
+                <p class="venue">Ongoing Research</p>
+                <p>Developing intelligent tutoring systems that leverage VR and reinforcement learning to create personalized educational experiences. Focus on multimodal interaction and real-time adaptation to learner behavior.</p>
+            </div>
+
+            <div class="card research-item">
+                <h3>Human-AI Collaboration in Extended Reality</h3>
+                <p class="venue">Ongoing Research</p>
+                <p>Exploring frameworks for seamless human-AI collaboration in XR environments. Investigating natural interaction paradigms, gesture recognition, and AI-assisted design tools for spatial computing platforms.</p>
+            </div>
+        </div>
+    </section>
+
+    <section id="projects">
+        <div class="container">
+            <h2 class="section-title">Featured Projects</h2>
+            <div class="projects-grid">
+                <div class="project-card">
+                    <h3>NeuroVision VR</h3>
+                    <p>Immersive brain visualization tool using real-time fMRI data and VR. Enables neuroscientists to explore neural activity in 3D space with ML-powered pattern recognition.</p>
+                </div>
+
+                <div class="project-card">
+                    <h3>AI Art Generator</h3>
+                    <p>Generative adversarial network (GAN) based art creation platform. Trained on millions of artworks to generate unique pieces across various styles and genres.</p>
+                </div>
+
+                <div class="project-card">
+                    <h3>Gesture Control System</h3>
+                    <p>Real-time hand tracking and gesture recognition system for VR interfaces. Uses CNN and LSTM networks to interpret complex hand movements with 98% accuracy.</p>
+                </div>
+
+                <div class="project-card">
+                    <h3>Autonomous VR Agent</h3>
+                    <p>Reinforcement learning agent that navigates complex VR environments. Demonstrates emergent behavior and adapts to dynamic obstacles using deep Q-learning.</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    </main>
+
+    <section id="contact">
+        <div class="container">
+            <h2 class="section-title">Get In Touch</h2>
+            <div class="card" style="text-align: center;">
+                <p style="font-size: 1.2rem; margin-bottom: 2rem;">
+                    Interested in collaboration or just want to chat about AI, ML, or VR? 
+                    Feel free to reach out!
+                </p>
+                <div class="social-links">
+                    <a href="mailto:your.email@example.com">Email</a>
+                    <a href="https://github.com/yourusername" target="_blank" rel="noopener noreferrer">GitHub</a>
+                    <a href="https://linkedin.com/in/yourusername" target="_blank" rel="noopener noreferrer">LinkedIn</a>
+                    <a href="https://twitter.com/yourusername" target="_blank" rel="noopener noreferrer">Twitter</a>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <footer>
+        <p>&copy; 2024 Your Name. All rights reserved.</p>
+        <p style="margin-top: 0.5rem;">Built with passion for the future of technology</p>
+    </footer>
+
+    <script>
+        // Day/Night Toggle (accessible + persisted)
+        const toggleBtn = document.getElementById('toggleBtn');
+        const body = document.body;
+
+        // Initialize theme from localStorage
+        const savedTheme = localStorage.getItem('theme');
+        if (savedTheme === 'day') {
+            body.classList.remove('night-mode');
+            body.classList.add('day-mode');
+            toggleBtn.setAttribute('aria-pressed', 'true');
+        } else {
+            body.classList.remove('day-mode');
+            body.classList.add('night-mode');
+            toggleBtn.setAttribute('aria-pressed', 'false');
+        }
+
+        function setTheme(isDay) {
+            if (isDay) {
+                body.classList.remove('night-mode');
+                body.classList.add('day-mode');
+                toggleBtn.setAttribute('aria-pressed', 'true');
+                localStorage.setItem('theme', 'day');
+            } else {
+                body.classList.remove('day-mode');
+                body.classList.add('night-mode');
+                toggleBtn.setAttribute('aria-pressed', 'false');
+                localStorage.setItem('theme', 'night');
+            }
+        }
+
+        toggleBtn.addEventListener('click', () => {
+            setTheme(!body.classList.contains('day-mode'));
+        });
+
+        // Generate stars
+        const starsContainer = document.getElementById('stars');
+        for (let i = 0; i < 200; i++) {
+            const star = document.createElement('div');
+            star.className = 'star';
+            star.style.left = Math.random() * 100 + '%';
+            star.style.top = Math.random() * 100 + '%';
+            star.style.animationDelay = Math.random() * 3 + 's';
+            star.style.animationDuration = (Math.random() * 3 + 2) + 's';
+            starsContainer.appendChild(star);
+        }
+
+        // Generate shooting stars
+        for (let i = 0; i < 5; i++) {
+            const shootingStar = document.createElement('div');
+            shootingStar.className = 'shooting-star';
+            shootingStar.style.left = Math.random() * 100 + '%';
+            shootingStar.style.top = Math.random() * 50 + '%';
+            shootingStar.style.animationDelay = Math.random() * 5 + 's';
+            shootingStar.style.animationDuration = (Math.random() * 2 + 1) + 's';
+            starsContainer.appendChild(shootingStar);
+        }
+
+        // Generate clouds
+        const cloudsContainer = document.getElementById('clouds');
+        for (let i = 0; i < 8; i++) {
+            const cloud = document.createElement('div');
+            cloud.className = 'cloud';
+            const size = Math.random() * 100 + 80;
+            cloud.style.width = size + 'px';
+            cloud.style.height = size * 0.6 + 'px';
+            cloud.style.top = Math.random() * 60 + '%';
+            cloud.style.left = -200 + 'px';
+            cloud.style.animationDelay = Math.random() * 10 + 's';
+            cloud.style.animationDuration = (Math.random() * 20 + 20) + 's';
+            cloudsContainer.appendChild(cloud);
+        }
+
+        // Smooth scrolling
+        document.querySelectorAll('nav a').forEach(anchor => {
+            anchor.addEventListener('click', function(e) {
+                e.preventDefault();
+                const target = document.querySelector(this.getAttribute('href'));
+                target.scrollIntoView({ behavior: 'smooth', block: 'start' });
+            });
+        });
+
+        // Particle effects on mouse move (throttled and respects reduced motion)
+        let lastParticleTime = 0;
+        const PARTICLE_INTERVAL = 50; // ms
+        const shouldCreateParticle = () => Math.random() > 0.95;
+
+        document.addEventListener('mousemove', (e) => {
+            if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) return;
+            const now = performance.now();
+            if (now - lastParticleTime < PARTICLE_INTERVAL) return;
+            lastParticleTime = now;
+            if (!shouldCreateParticle()) return;
+
+            const particle = document.createElement('div');
+            particle.className = 'particle';
+            particle.style.left = e.clientX + 'px';
+            particle.style.top = e.clientY + 'px';
+            particle.style.width = Math.random() * 5 + 2 + 'px';
+            particle.style.height = particle.style.width;
+
+            if (body.classList.contains('night-mode')) {
+                particle.style.background = Math.random() > 0.5 ? '#00ffff' : '#ff00ff';
+                particle.style.boxShadow = `0 0 10px ${particle.style.background}`;
+            } else {
+                particle.style.background = Math.random() > 0.5 ? '#ffd700' : '#ff69b4';
+                particle.style.boxShadow = `0 0 10px ${particle.style.background}`;
+            }
+
+            particle.style.borderRadius = '50%';
+            particle.style.pointerEvents = 'none';
+            particle.style.animation = 'particleFade 1s ease-out forwards';
+            document.body.appendChild(particle);
+
+            setTimeout(() => particle.remove(), 1000);
+        });
+
+        // Add particle fade animation
+        const style = document.createElement('style');
+        style.textContent = `
+            @keyframes particleFade {
+                0% { opacity: 1; transform: scale(1) translateY(0); }
+                100% { opacity: 0; transform: scale(0) translateY(-50px); }
+            }
+        `;
+        document.head.appendChild(style);
+
+        // Card intersection observer for entrance animations
+        const cards = document.querySelectorAll('.card, .project-card');
+        const observerOptions = {
+            threshold: 0.1,
+            rootMargin: '0px 0px -100px 0px'
+        };
+
+        const observer = new IntersectionObserver((entries) => {
+            entries.forEach((entry, index) => {
+                if (entry.isIntersecting) {
+                    setTimeout(() => {
+                        entry.target.style.animation = 'fadeInUp 0.8s ease forwards';
+                    }, index * 100);
+                    observer.unobserve(entry.target);
+                }
+            });
+        }, observerOptions);
+
+        cards.forEach(card => {
+            card.style.opacity = '0';
+            observer.observe(card);
+        });
+    </script>
+</body>
+</html>

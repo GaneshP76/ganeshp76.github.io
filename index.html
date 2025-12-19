@@ -408,6 +408,124 @@
             text-shadow: 0 0 20px rgba(255, 255, 255, 0.5);
         }
 
+        /* Blackhole and Supernova theme extensions */
+        /* The site now supports two cinematic themes: a procedurally styled blackhole theme (inspired by scientific visuals) and a bright supernova theme.
+           For copyright reasons we don't embed movie stills; instead we provide original, stylable visuals and public-domain / Creative Commons astronomical images. */
+        .astro-bg {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-size: cover;
+            background-position: center;
+            filter: saturate(1) contrast(1);
+            transition: opacity 1s ease, filter 1s ease;
+            opacity: 1;
+            z-index: -2; /* sit behind stars and content */
+            pointer-events: none;
+        }
+
+        .astro-caption {
+            position: fixed;
+            right: 1rem;
+            bottom: 1rem;
+            background: rgba(0,0,0,0.45);
+            color: #fff;
+            padding: 0.5rem 0.75rem;
+            border-radius: 6px;
+            font-size: 0.9rem;
+            z-index: 1002;
+            backdrop-filter: blur(4px);
+        }
+
+        .theme-label {
+            margin-top: 0.5rem;
+            color: #fff;
+            font-weight: 600;
+            text-align: center;
+            font-size: 0.85rem;
+        }
+
+        .bg-select {
+            margin-top: 0.5rem;
+            width: 140px;
+            background: rgba(0,0,0,0.35);
+            color: #fff;
+            border: 1px solid rgba(255,255,255,0.08);
+            border-radius: 6px;
+            padding: 0.25rem 0.4rem;
+            z-index: 2001;
+        }
+
+        /* Blackhole visuals: an animated accretion disk + subtle lensing bands */
+        body.blackhole-mode .astro-bg {
+            filter: contrast(1.05) saturate(1.1) brightness(0.4) hue-rotate(180deg);
+        }
+
+        body.blackhole-mode .astro-bg::before,
+        body.blackhole-mode .astro-bg::after {
+            content: '';
+            position: absolute;
+            inset: 0;
+            pointer-events: none;
+            mix-blend-mode: screen;
+        }
+
+        /* Accretion disk (conic gradient ring) */
+        body.blackhole-mode .astro-bg::before {
+            background: radial-gradient(circle at center, rgba(0,0,0,1) 0%, rgba(0,0,0,1) 22%, rgba(255,160,30,0.12) 28%, rgba(255,60,10,0.18) 36%, rgba(255,160,30,0.08) 44%, transparent 60%);
+            transform: scale(1);
+            filter: blur(6px) saturate(1.4);
+            animation: accrete 6s linear infinite;
+        }
+
+        @keyframes accrete {
+            0% { transform: rotate(0deg) scale(1); }
+            100% { transform: rotate(360deg) scale(1); }
+        }
+
+        /* Subtle lensing rims */
+        body.blackhole-mode .astro-bg::after {
+            background: radial-gradient(circle at 50% 50%, rgba(255,255,255,0.06) 18%, transparent 32%), radial-gradient(circle at 60% 60%, rgba(255,255,255,0.03) 12%, transparent 24%);
+            filter: blur(14px) contrast(1.2);
+        }
+
+        /* Supernova visuals: brighten and add radial flash */
+        body.supernova-mode .astro-bg {
+            filter: brightness(1.6) saturate(1.4) contrast(1.05);
+            animation: supernovaFlash 6s ease-in-out infinite;
+        }
+
+        @keyframes supernovaFlash {
+            0%, 100% { filter: brightness(1.4) saturate(1.3); }
+            50% { filter: brightness(2.2) saturate(1.6) contrast(1.1); }
+        }
+
+        /* Make particle colours react to active theme */
+        body[data-theme='blackhole'] .particle { background: linear-gradient(90deg, #00ffff, #ff00ff); box-shadow: 0 0 10px rgba(0,255,255,0.6); }
+        body[data-theme='supernova'] .particle { background: linear-gradient(90deg,#ffd700,#ff69b4); box-shadow: 0 0 10px rgba(255,215,0,0.6); }
+
+        /* Blackhole WebGL canvas container */
+        #blackholeScene {
+            position: fixed;
+            inset: 0;
+            z-index: -1; /* above astro-bg (-2), behind stars (0) */
+            pointer-events: none;
+            opacity: 0;
+            transition: opacity 1s ease;
+        }
+
+        body.blackhole-mode #blackholeScene {
+            opacity: 1;
+        }
+
+        body.blackhole-mode #blackholeScene canvas {
+            width: 100%;
+            height: 100%;
+            display: block;
+        }
+
         @keyframes fadeInUp {
             from {
                 opacity: 0;
@@ -785,10 +903,24 @@
     <div class="sun"></div>
     <div class="moon"></div>
 
-    <div class="toggle-container">
-        <button id="toggleBtn" class="toggle-btn" aria-pressed="false" aria-label="Toggle day/night theme">
+    <!-- Astronomical background layer (gallery of nebulae, galaxies, supernova remnants) -->
+    <div id="astroBg" class="astro-bg" aria-hidden="true"></div>
+    <div id="astroCaption" class="astro-caption" aria-hidden="true">Galaxy</div>
+    <!-- WebGL canvas container for a realistic blackhole shader (lazy-loaded) -->
+    <div id="blackholeScene" aria-hidden="true"></div> 
+
+    <div class="toggle-container" role="region" aria-label="Theme controls">
+        <button id="toggleBtn" class="toggle-btn" aria-pressed="false" aria-label="Cycle theme">
             <div class="toggle-slider" aria-hidden="true"></div>
         </button>
+        <div id="themeLabel" class="theme-label" aria-hidden="true">Blackhole</div>
+        <select id="bgSelect" class="bg-select" aria-label="Choose background">
+            <option value="m51">Whirlpool Galaxy (M51)</option>
+            <option value="pillars">Pillars of Creation</option>
+            <option value="crab">Crab Nebula (M1)</option>
+            <option value="kepler">Kepler Supernova Remnant</option>
+            <option value="eht">EHT Black Hole (M87)</option>
+        </select>
     </div>
 
     <nav>
@@ -979,39 +1111,257 @@
     </footer>
 
     <script>
-        // Day/Night Toggle (accessible + persisted)
+        // Theme system (Blackhole <-> Supernova) + Background gallery (accessible + persisted)
         const toggleBtn = document.getElementById('toggleBtn');
         const body = document.body;
+        const themeLabel = document.getElementById('themeLabel');
+        const bgSelect = document.getElementById('bgSelect');
+        const astroBg = document.getElementById('astroBg');
+        const astroCaption = document.getElementById('astroCaption');
 
-        // Initialize theme from localStorage
-        const savedTheme = localStorage.getItem('theme');
-        if (savedTheme === 'day') {
-            body.classList.remove('night-mode');
-            body.classList.add('day-mode');
-            toggleBtn.setAttribute('aria-pressed', 'true');
-        } else {
-            body.classList.remove('day-mode');
-            body.classList.add('night-mode');
-            toggleBtn.setAttribute('aria-pressed', 'false');
+        const THEMES = ['blackhole', 'supernova'];
+        const DEFAULT_THEME = 'blackhole';
+
+        const BG_IMAGES = {
+            m51: { url: 'assets/bg/m51.svg', caption: 'Whirlpool Galaxy (M51) - placeholder' },
+            pillars: { url: 'assets/bg/pillars.svg', caption: 'Pillars of Creation - placeholder' },
+            crab: { url: 'assets/bg/crab.svg', caption: 'Crab Nebula (M1) - placeholder' },
+            kepler: { url: 'assets/bg/kepler.svg', caption: 'Kepler Supernova Remnant - placeholder' },
+            eht: { url: 'assets/bg/eht.svg', caption: 'EHT Black Hole (M87) - placeholder' }
+        };
+
+        function applyTheme(theme) {
+            body.classList.remove('blackhole-mode', 'supernova-mode', 'night-mode', 'day-mode');
+            if (theme === 'blackhole') {
+                body.classList.add('blackhole-mode', 'night-mode');
+                toggleBtn.setAttribute('aria-pressed', 'false');
+                themeLabel.textContent = 'Blackhole';
+            } else {
+                body.classList.add('supernova-mode', 'day-mode');
+                toggleBtn.setAttribute('aria-pressed', 'true');
+                themeLabel.textContent = 'Supernova';
+            }
+            body.dataset.theme = theme;
+            localStorage.setItem('theme', theme);
         }
 
-        function setTheme(isDay) {
-            if (isDay) {
-                body.classList.remove('night-mode');
-                body.classList.add('day-mode');
-                toggleBtn.setAttribute('aria-pressed', 'true');
-                localStorage.setItem('theme', 'day');
-            } else {
-                body.classList.remove('day-mode');
-                body.classList.add('night-mode');
-                toggleBtn.setAttribute('aria-pressed', 'false');
-                localStorage.setItem('theme', 'night');
+        // initialize theme and background
+        const savedTheme = localStorage.getItem('theme') || DEFAULT_THEME;
+        applyTheme(savedTheme);
+
+        // cycle between the two cinematic themes
+        toggleBtn.addEventListener('click', () => {
+            const current = localStorage.getItem('theme') || DEFAULT_THEME;
+            const next = current === 'blackhole' ? 'supernova' : 'blackhole';
+            applyTheme(next);
+        });
+
+        function setBackground(key) {
+            const item = BG_IMAGES[key];
+            if (!item) return;
+            astroBg.style.backgroundImage = `url('${item.url}')`;
+            astroCaption.textContent = item.caption;
+            localStorage.setItem('bgKey', key);
+        }
+
+        // restore background choice
+        const savedBg = localStorage.getItem('bgKey') || 'm51';
+        if (bgSelect) { bgSelect.value = savedBg; bgSelect.addEventListener('change', (e) => setBackground(e.target.value)); }
+        setBackground(savedBg);
+
+        // preload images for smoother switch
+        Object.values(BG_IMAGES).forEach(i => { const img = new Image(); img.src = i.url; });
+
+        /* ---- Three.js Blackhole shader (lazy-loaded, optional) ---- */
+        let BH = null; // will hold renderer, scene, material, etc.
+
+        function loadThree(next) {
+            if (window.THREE) return next();
+            const s = document.createElement('script');
+            s.src = 'https://unpkg.com/three@0.158.0/build/three.min.js';
+            s.onload = next;
+            s.onerror = () => console.warn('Failed to load Three.js');
+            document.head.appendChild(s);
+        }
+
+        function initBlackholeScene(bgUrl) {
+            if (!document.getElementById('blackholeScene')) return;
+            try {
+                const container = document.getElementById('blackholeScene');
+                const renderer = new THREE.WebGLRenderer({ alpha: true, antialias: true });
+                renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
+                renderer.setSize(window.innerWidth, window.innerHeight);
+                container.appendChild(renderer.domElement);
+
+                const scene = new THREE.Scene();
+                const camera = new THREE.OrthographicCamera(-1, 1, 1, -1, 0, 1);
+
+                const uniforms = {
+                    resolution: { value: new THREE.Vector2(window.innerWidth, window.innerHeight) },
+                    time: { value: 0.0 },
+                    bgTex: { value: null },
+                    strength: { value: 0.85 },
+                    diskIntensity: { value: 1.0 },
+                    center: { value: new THREE.Vector2(0.5, 0.52) }
+                };
+
+                const vertexShader = `
+                    varying vec2 vUv;
+                    void main() {
+                        vUv = uv;
+                        gl_Position = vec4( position, 1.0 );
+                    }
+                `;
+
+                const fragmentShader = `
+                    varying vec2 vUv;
+                    uniform vec2 resolution;
+                    uniform float time;
+                    uniform sampler2D bgTex;
+                    uniform float strength;
+                    uniform float diskIntensity;
+                    uniform vec2 center;
+
+                    // simple pseudo-random
+                    float rand(vec2 co){ return fract(sin(dot(co.xy ,vec2(12.9898,78.233))) * 43758.5453); }
+
+                    void main() {
+                        vec2 uv = vUv;
+                        vec2 disp = uv - center;
+                        float r = length(disp);
+
+                        // gravitational lensing (simple inverse-square-like mapping)
+                        float eps = 0.0001;
+                        float factor = 1.0 / (1.0 + strength * pow(r + eps, 2.0));
+                        vec2 lensed = center + disp * factor;
+
+                        vec3 bg = vec3(0.02, 0.01, 0.02);
+                        if (bgTex != null) {
+                            vec4 s = texture2D(bgTex, clamp(lensed, 0.0, 1.0));
+                            bg = s.rgb;
+                        }
+
+                        // Accretion disk ring
+                        float disk = smoothstep(0.15, 0.13, r) - smoothstep(0.28, 0.26, r);
+                        // add rotational color bands
+                        float angle = atan(disp.y, disp.x);
+                        float band = smoothstep(0.0, 1.0, sin(angle * 12.0 + time * 3.0) * 0.5 + 0.5);
+                        vec3 diskColor = mix(vec3(1.0,0.6,0.2), vec3(1.0,0.15,0.05), band);
+                        vec3 diskGlow = diskColor * disk * diskIntensity * (1.0 - smoothstep(0.0, 0.6, r));
+
+                        // central shadow (event horizon)
+                        float horizon = smoothstep(0.12, 0.11, r);
+
+                        // subtle lens flare/artifacts
+                        float noise = rand(uv * time);
+
+                        vec3 col = bg + diskGlow;
+                        col *= 1.0 - (1.0 - horizon) * 1.0; // ensure center is dark
+
+                        // vignette
+                        float vign = smoothstep(1.2, 0.5, r * 1.2);
+                        col *= vign;
+
+                        // final tone mapping
+                        col = pow(col, vec3(0.9));
+
+                        gl_FragColor = vec4(col, 1.0);
+                    }
+                `;
+
+                const material = new THREE.ShaderMaterial({
+                    uniforms,
+                    vertexShader,
+                    fragmentShader,
+                    transparent: true
+                });
+
+                const geometry = new THREE.PlaneGeometry(2, 2);
+                const mesh = new THREE.Mesh(geometry, material);
+                scene.add(mesh);
+
+                // load background texture
+                const loader = new THREE.TextureLoader();
+                let bgTexture = null;
+                loader.load(bgUrl, (tex) => {
+                    tex.minFilter = THREE.LinearFilter;
+                    tex.magFilter = THREE.LinearFilter;
+                    tex.wrapS = tex.wrapT = THREE.ClampToEdgeWrapping;
+                    uniforms.bgTex.value = tex;
+                    bgTexture = tex;
+                });
+
+                // resize handler
+                function onResize() {
+                    renderer.setSize(window.innerWidth, window.innerHeight);
+                    uniforms.resolution.value.set(window.innerWidth, window.innerHeight);
+                }
+                window.addEventListener('resize', onResize);
+
+                let then = performance.now();
+                function animate(now) {
+                    uniforms.time.value = now * 0.001;
+                    renderer.render(scene, camera);
+                    BH.animId = requestAnimationFrame(animate);
+                }
+                BH = { renderer, scene, camera, material, mesh, animId: null, bgTexture, onResize, container };
+                BH.animId = requestAnimationFrame(animate);
+            } catch (err) {
+                console.warn('Blackhole WebGL init failed:', err);
+                BH = null;
             }
         }
 
-        toggleBtn.addEventListener('click', () => {
-            setTheme(!body.classList.contains('day-mode'));
-        });
+        function updateBlackholeTexture(url) {
+            if (!BH || !window.THREE) return;
+            const loader = new THREE.TextureLoader();
+            loader.load(url, (tex) => {
+                tex.minFilter = THREE.LinearFilter;
+                tex.magFilter = THREE.LinearFilter;
+                tex.wrapS = tex.wrapT = THREE.ClampToEdgeWrapping;
+                if (BH && BH.material && BH.material.uniforms) BH.material.uniforms.bgTex.value = tex;
+                BH.bgTexture = tex;
+            });
+        }
+
+        function disposeBlackhole() {
+            if (!BH) return;
+            cancelAnimationFrame(BH.animId);
+            window.removeEventListener('resize', BH.onResize);
+            try {
+                if (BH.bgTexture) BH.bgTexture.dispose();
+                if (BH.material) BH.material.dispose();
+                if (BH.mesh) BH.mesh.geometry.dispose();
+                if (BH.renderer) { BH.renderer.dispose(); BH.container.removeChild(BH.renderer.domElement); }
+            } catch (e) { console.warn('Error disposing blackhole:', e); }
+            BH = null;
+        }
+
+        function enableBlackholeIfNeeded() {
+            const current = localStorage.getItem('theme') || DEFAULT_THEME;
+            if (current === 'blackhole') {
+                // lazy load Three.js and init
+                loadThree(() => {
+                    const bgKey = localStorage.getItem('bgKey') || 'm51';
+                    const url = BG_IMAGES[bgKey] ? BG_IMAGES[bgKey].url : Object.values(BG_IMAGES)[0].url;
+                    if (!BH) initBlackholeScene(url);
+                });
+            } else {
+                // if switching away, dispose
+                disposeBlackhole();
+            }
+        }
+
+        // ensure blackhole enabled on load if needed
+        enableBlackholeIfNeeded();
+
+        // update background selection to notify blackhole shader
+        const oldSetBackground = setBackground;
+        setBackground = function(key) {
+            oldSetBackground(key);
+            const url = BG_IMAGES[key] ? BG_IMAGES[key].url : null;
+            if (url) updateBlackholeTexture(url);
+        };
 
         // Generate stars
         const starsContainer = document.getElementById('stars');

@@ -1,0 +1,13 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 800">
+  <rect width="100%" height="100%" fill="#05050a" />
+  <radialGradient id="g3" cx="60%" cy="40%" r="50%">
+    <stop offset="0%" stop-color="#ffe7c7" />
+    <stop offset="60%" stop-color="#ff9a6b" />
+    <stop offset="100%" stop-color="#1b0b14" />
+  </radialGradient>
+  <rect width="100%" height="100%" fill="url(#g3)" opacity="0.08" />
+  <g fill="#fff" font-family="Segoe UI, Roboto, Arial" text-anchor="middle">
+    <text x="50%" y="48%" font-size="34" font-weight="700">Kepler SNR</text>
+    <text x="50%" y="56%" font-size="16" fill="#ffdcb8">Supernova remnant (placeholder)</text>
+  </g>
+</svg>
